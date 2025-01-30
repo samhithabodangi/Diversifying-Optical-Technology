@@ -23,8 +23,8 @@
 DFRobot_AXP313A axp;
 
 // Enter your WiFi credentials
-const char* ssid = "****;
-const char* password = "***";
+const char* ssid = "*****";
+const char* password = "****";
 
 void startCameraServer();
 
@@ -133,6 +133,11 @@ void setup() {
   Serial.print("Camera Ready! Use 'http://");
   Serial.print(WiFi.localIP());
   Serial.println("' to connect");
+}
+
+void loop() {
+  // Do nothing. Everything is done in another task by the web server
+  delay(10000);
 }
 
 void loop() {
