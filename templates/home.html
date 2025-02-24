@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32-CAM OCR Live Stream (Python)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h2>ESP32-CAM Live Stream with OCR</h2>
+
+    <script>
+        function captureImage() {
+            fetch('/capture', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('captured-image').src = '/static/captured.jpg';
+                });
+        }
+
+        function recognizeText() {
+            fetch('/recognize', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    const englishText = data.recognized_text || 'No text';
+                    const brailleText = data.braille_text || 'No Braille';
+                    
+                    document.getElementById('english').textContent = englishText;
+                    document.getElementById('braille').textContent = brailleText;
+                });
+        }
+
+        function captureAndRecognize() {
+            captureImage();
+            recognizeText();
+        }
+    </script>
+
+    <div class="container">
+        <div>
+            <h3>Live Stream</h3>
+            <img id="video-stream" src="{{ url_for('video_feed') }}">
+        </div>
+        <div>
+            <h3>Captured Image</h3>
+            <img id="captured-image" src="/static/captured.jpg">
+        </div>
+    </div>
+    
+    <button onclick="captureAndRecognize()">Capture and Recognize</button>
+    <p id="english">Extracted Text: </p>
+    <p id="braille">Braille Translation: </p>
+
+</body>
+</html>

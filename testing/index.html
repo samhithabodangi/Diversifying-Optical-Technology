@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32-CAM OCR Live Stream</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h2>ESP32-CAM Live Stream with OCR</h2>
+    
+    <div class="container">
+        <div>
+            <h3>Live Stream</h3>
+            <img id="video-stream" src="" alt="ESP32-CAM Stream">
+        </div>
+        <div>
+            <h3>Captured Image</h3>
+            <img id="captured-image" src="" alt="Captured Frame">
+        </div>
+    </div>
+    
+    <button id="capture-btn">Capture and Recognize</button>
+    <p id="text-output">Extracted Text: </p>
+
+    <script>
+        const espCamUrl = "http://192.168.5.218/capture"; 
+        const imgElement = document.getElementById("video-stream");
+        const capturedImgElement = document.getElementById("captured-image");
+        const textOutput = document.getElementById("text-output");
+        const captureBtn = document.getElementById("capture-btn");
+
+        function updateStream() {
+            imgElement.src = espCamUrl + "?t=" + new Date().getTime();
+        }
+
+        async function captureAndRecognize() {
+            try {
+                captureBtn.disabled = true; 
+                textOutput.innerText = "Processing...";
+                
+                capturedImgElement.src = imgElement.src;
+
+                const image = new Image();
+                image.crossOrigin = "Anonymous";
+                image.src = capturedImgElement.src;
+
+                image.onload = async function() {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+                    const { data: { text } } = await Tesseract.recognize(canvas, 'eng', {
+                        logger: m => console.log(m)
+                    });
+
+                    textOutput.innerText = "Extracted Text: " + text;
+                    console.log("Extracted Text:", text);
+                    captureBtn.disabled = false;
+                };
+            } catch (error) {
+                console.error("OCR Error:", error);
+                textOutput.innerText = "Error extracting text.";
+                captureBtn.disabled = false;
+            }
+        }
+
+        setInterval(updateStream, 500);
+
+        captureBtn.addEventListener("click", captureAndRecognize);
+    </script>
+</body>
+</html>
