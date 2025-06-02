@@ -1,0 +1,74 @@
+import RPi.GPIO as GPIO
+import time
+
+# Braille mapping: each sublist represents dots 1-6 for a-z
+braille = [
+    [1,0,0,0,0,0],  # a
+    [1,1,0,0,0,0],  # b
+    [1,0,0,1,0,0],  # c
+    [1,0,0,1,1,0],  # d
+    [1,0,0,0,1,0],  # e
+    [1,1,0,1,0,0],  # f
+    [1,1,0,1,1,0],  # g
+    [1,1,0,0,1,0],  # h
+    [0,1,0,1,0,0],  # i
+    [0,1,0,1,1,0],  # j
+    [1,0,1,0,0,0],  # k
+    [1,1,1,0,0,0],  # l
+    [1,0,1,1,0,0],  # m
+    [1,0,1,1,1,0],  # n
+    [1,0,1,0,1,0],  # o
+    [1,1,1,1,0,0],  # p
+    [1,1,1,1,1,0],  # q
+    [1,1,1,0,1,0],  # r
+    [0,1,1,1,0,0],  # s
+    [0,1,1,1,1,0],  # t
+    [1,0,1,0,0,1],  # u
+    [1,1,1,0,0,1],  # v
+    [0,1,0,1,1,1],  # w
+    [1,0,1,1,0,1],  # x
+    [1,0,1,1,1,1],  # y
+    [1,0,1,0,1,1],  # z
+]
+
+# Define GPIO pins for solenoids and button
+control_pins = [22, 23, 24, 25, 26, 27]  # BCM mode pin numbers
+button_pin = 17
+
+# The text to convert to braille
+text = "hello"
+
+# Setup
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+
+# Setup solenoid pins as outputs
+for pin in control_pins:
+    GPIO.setup(pin, GPIO.OUT)
+
+# Setup button pin as input
+GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+# Loop through the text
+try:
+    for char in text.lower():
+        if char.isalpha():
+            index = ord(char) - ord('a')
+            print(f"Displaying: {char} (Index {index})")
+
+            # Set solenoids according to braille pattern
+            for i in range(6):
+                GPIO.output(control_pins[i], braille[index][i])
+
+            # Wait for button press
+            print("Waiting for button press...")
+            while GPIO.input(button_pin) == 0:
+                time.sleep(0.01)
+
+            time.sleep(1)  # Debounce and pause before next letter
+
+except KeyboardInterrupt:
+    print("Program interrupted.")
+
+finally:
+    GPIO.cleanup()
