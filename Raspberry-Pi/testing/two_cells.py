@@ -77,19 +77,23 @@ try:
     for channel in solenoid_channels:
         set_solenoid_state(channel, 0) # Turn all solenoids off
     time.sleep(0.5) # Give them a moment to retract
+    
+    i = 0
+    while i < len(text) - 1:
+        char1 = text[i].lower()
+        char2 = text[i + 1].lower()
+        
+        if char1.isalpha() and char2.isalpha():
+            index_one = ord(char1) - ord('a')
+            index_two = ord(char2) - ord('a')
+            print(f"\nDisplaying: '{char1}{char2}' (Braille Indices: {index_one}, {index_two})")
 
-    for char in text.lower():
-        if char.isalpha():
-            index_one = ord(char) - ord('a')
-            index_two = ord(chr(ord(char) + 1)) - ord('a')
-            print(f"\nDisplaying: '{char}' (Braille Index One: {index_one}, Index Two: {index_two})")
+            for j in range(6):  # 6 dots per cell
+                channel_first = solenoid_channels[j]
+                channel_second = solenoid_channels[j + 6]
 
-            for i in range(6):  # 6 dots per cell
-                channel_first = solenoid_channels[i]
-                channel_second = solenoid_channels[i + 6]
-
-                dot_state_first = braille[index_one][i]
-                dot_state_second = braille[index_two][i]
+                dot_state_first = braille[index_one][j]
+                dot_state_second = braille[index_two][j]
 
                 set_solenoid_state(channel_first, dot_state_first)
                 set_solenoid_state(channel_second, dot_state_second)
@@ -100,6 +104,7 @@ try:
 
             # A short pause before the next letter, after button release
             time.sleep(1)
+        i += 2
 
 except KeyboardInterrupt:
     print("\nProgram interrupted.")
