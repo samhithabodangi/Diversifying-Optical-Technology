@@ -1,4 +1,4 @@
-mport RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
 from adafruit_pca9685 import PCA9685
 from time import sleep
